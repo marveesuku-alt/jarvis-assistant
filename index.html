@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07111f">
+<title>JARVIS — Personal Assistant</title>
+<style>
+:root{color-scheme:dark;--bg:#050b14;--panel:#0a1726;--line:#153c56;--blue:#5de1ff;--muted:#8ba8bb;--white:#eafaff}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% 25%,#0d2940 0%,#07111f 42%,#03070d 100%);color:var(--white);font:16px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+main{max-width:900px;margin:auto;padding:22px 16px 34px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:4px 0 16px}
+.brand{letter-spacing:.22em;font-weight:800;font-size:1.1rem}.brand span{color:var(--blue)}
+.status{font-size:.75rem;color:var(--blue);border:1px solid #20536b;border-radius:999px;padding:6px 10px;white-space:nowrap}
+h1{text-align:center;font-size:clamp(1.35rem,5vw,2rem);letter-spacing:.12em;margin:28px 0 4px}
+.sub{text-align:center;color:var(--muted);margin:0 0 18px;font-size:.9rem}
+.core-wrap{display:flex;justify-content:center;margin:18px auto 22px}
+.core{width:min(54vw,210px);aspect-ratio:1;border-radius:50%;border:1px solid #2c9bbd;display:grid;place-items:center;position:relative;background:radial-gradient(circle,#103d58 0%,#0b2136 42%,#07111f 70%);box-shadow:0 0 22px #0a8cb544,inset 0 0 24px #27caff22}
+.core:before,.core:after{content:"";position:absolute;inset:9%;border:1px dashed #4fcff788;border-radius:50%;animation:spin 18s linear infinite}
+.core:after{inset:19%;border-style:solid;border-color:#43bfe755;animation-direction:reverse;animation-duration:12s}
+.core.listening{box-shadow:0 0 42px #27caffaa,inset 0 0 30px #27caff66}
+.core.speaking{animation:pulse 1.2s ease-in-out infinite}
+.core-label{z-index:1;text-align:center;font-size:.7rem;letter-spacing:.2em;color:var(--blue)}
+.core-label strong{display:block;font-size:1.5rem;letter-spacing:.12em;margin-bottom:3px}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{transform:scale(1.035);filter:brightness(1.35)}}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+.panel{background:linear-gradient(135deg,#0b1a2aee,#07111fee);border:1px solid var(--line);border-radius:14px;padding:14px}
+.panel h2{font-size:.78rem;letter-spacing:.15em;color:var(--blue);margin:0 0 10px}
+.readout{color:var(--muted);font-size:.9rem;min-height:24px}
+.chat{height:180px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.msg{padding:9px 11px;border-radius:10px;font-size:.9rem;max-width:95%;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.jarvis{align-self:flex-start;background:#0c2638;border:1px solid #16455f}
+.msg.user{align-self:flex-end;background:#102e3b;border:1px solid #23718b}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+button,input{font:inherit}
+button{min-height:44px;border:1px solid #267b98;border-radius:10px;background:#0d2a3c;color:var(--white);padding:10px 14px;cursor:pointer}
+button.primary{background:linear-gradient(135deg,#0f7da1,#15526d);font-weight:700}
+button:disabled{opacity:.5;cursor:not-allowed}
+form{display:flex;gap:8px;margin-top:12px}
+input{min-width:0;flex:1;border:1px solid #21465b;border-radius:10px;padding:11px;background:#050e18;color:var(--white);font-size:16px}
+.small{font-size:.78rem;color:var(--muted);margin-top:12px}
+.features{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.feature{border:1px solid #173b51;border-radius:9px;padding:10px;color:#b8d4e3;font-size:.82rem}
+footer{text-align:center;color:#638398;font-size:.75rem;margin-top:20px}
+@media(min-width:700px){.grid{grid-template-columns:1.1fr .9fr}.chat-panel{grid-row:span 2}.chat{height:300px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="brand"><span>J</span>ARVIS / PERSONAL AI</div><div class="status" id="status">● SYSTEM READY</div></header>
+<h1>GOOD EVENING</h1><p class="sub">PERSONAL ASSISTANT • PROTOTYPE 01</p>
+<div class="core-wrap"><div class="core" id="core"><div class="core-label"><strong>J.A.R.V.I.S.</strong><span id="coreState">STANDBY</span></div></div></div>
+<div class="grid">
+<section class="panel chat-panel"><h2>VOICE & COMMUNICATION</h2><div class="chat" id="chat" aria-live="polite"><div class="msg jarvis">Good evening. Systems are ready. You can type a message or tap the microphone to try a voice command.</div></div>
+<form id="chatForm"><input id="message" aria-label="Message to JARVIS" placeholder="Type a command…" autocomplete="off"><button class="primary" type="submit">Send</button></form>
+<div class="controls"><button class="primary" id="micBtn" type="button">🎙 Start listening</button><button id="speakBtn" type="button">🔊 Repeat last reply</button><button id="clearBtn" type="button">Clear chat</button></div>
+<p class="small">Voice recognition depends on browser support and may require internet access. This prototype does not listen continuously in the background.</p>
+</section>
+<section class="panel"><h2>SYSTEM STATUS</h2><div class="readout" id="systemReadout">Interface online. AI connection: not configured.</div><div class="features" style="margin-top:12px"><div class="feature">● Interface: ONLINE</div><div class="feature">● Voice output: AVAILABLE</div><div class="feature">● AI brain: NOT CONNECTED</div><div class="feature">● Wake phrase: NOT ENABLED</div></div></section>
+<section class="panel"><h2>AVAILABLE COMMANDS</h2><div class="readout">Try one of these starter commands:</div><div class="controls"><button class="example" type="button" data-cmd="What time is it?">Time</button><button class="example" type="button" data-cmd="What is today's date?">Date</button><button class="example" type="button" data-cmd="What can you do?">Help</button><button class="example" type="button" data-cmd="Hello JARVIS">Greet</button></div></section>
+</div>
+<footer>JARVIS is a personal project inspired by science-fiction assistants. This prototype is not the movie AI.</footer>
+</main>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const chat=$('chat'), core=$('core'), status=$('status'), coreState=$('coreState');
+let lastReply='Systems are ready.';
+function addMessage(text,who){const el=document.createElement('div');el.className='msg '+who;el.textContent=text;chat.appendChild(el);chat.scrollTop=chat.scrollHeight;}
+function setState(label, cls){coreState.textContent=label;core.classList.remove('listening','speaking');if(cls)core.classList.add(cls);status.textContent='● '+(label==='LISTENING'?'LISTENING':label==='SPEAKING'?'SPEAKING':'SYSTEM READY');}
+function speak(text){lastReply=text;if(!('speechSynthesis' in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-GB';u.rate=.92;u.pitch=.82;const voices=window.speechSynthesis.getVoices();const maleLike=voices.find(v=>/male|daniel|george|oliver|david|mark/i.test(v.name)&&/^en/i.test(v.lang))||voices.find(v=>/^en-GB/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang));if(maleLike)u.voice=maleLike;u.onstart=()=>setState('SPEAKING','speaking');u.onend=()=>setState('STANDBY');window.speechSynthesis.speak(u);}
+function answer(input){const q=input.toLowerCase().trim();let r;
+if(/\b(time|clock)\b/.test(q))r='The current time on this device is '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})+'.';
+else if(/\b(date|today|day)\b/.test(q))r='Today is '+new Date().toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'.';
+else if(/\b(hello|hi|good morning|good evening|hey)\b/.test(q))r='Hello. JARVIS is online and ready to assist. What would you like to do?';
+else if(/\b(help|what can you do|commands)\b/.test(q))r='At this stage I can tell you the time and date, greet you, and demonstrate voice input and speech output. My full AI brain is not connected yet. That is our next development step.';
+else if(/\b(your name|who are you)\b/.test(q))r='I am JARVIS, your personal assistant prototype. My voice and interface are active, but advanced AI and phone controls have not been connected yet.';
+else r='I received your message: '+input+'. My AI brain is not connected yet, so I cannot answer that freely. We will connect an AI service in a later stage.';
+addMessage(r,'jarvis');speak(r);}
+function submit(text){const v=(text||'').trim();if(!v)return;addMessage(v,'user');$('message').value='';answer(v);}
+$('chatForm').addEventListener('submit',e=>{e.preventDefault();submit($('message').value);});
+$('speakBtn').addEventListener('click',()=>speak(lastReply));
+$('clearBtn').addEventListener('click',()=>{chat.replaceChildren();addMessage('Conversation cleared. Systems ready.','jarvis');setState('STANDBY');});
+document.querySelectorAll('.example').forEach(b=>b.addEventListener('click',()=>submit(b.dataset.cmd)));
+let recognition=null, listening=false;
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SpeechRecognition){recognition=new SpeechRecognition();recognition.lang='en-GB';recognition.interimResults=false;recognition.maxAlternatives=1;recognition.onstart=()=>{listening=true;$('micBtn').textContent='Listening… tap to stop';setState('LISTENING','listening');};recognition.onresult=e=>{const text=e.results[0][0].transcript;submit(text);};recognition.onerror=e=>{addMessage('Voice input issue: '+e.error+'. You can type a command instead.','jarvis');};recognition.onend=()=>{listening=false;$('micBtn').textContent='🎙 Start listening';if(coreState.textContent==='LISTENING')setState('STANDBY');};}
+else{$('micBtn').disabled=true;$('micBtn').textContent='Voice input not supported';}
+$('micBtn').addEventListener('click',()=>{if(!recognition)return;if(listening)recognition.stop();else{try{recognition.start();}catch(e){addMessage('Could not start listening. Please try again.','jarvis');}}});
+if('speechSynthesis'in window)window.speechSynthesis.getVoices();
+})();
+</script>
+</body>
+</html>
